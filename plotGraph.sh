@@ -1,5 +1,6 @@
 #!/bin/bash
-MYSQLPASS="344117ABc#"
+datetime=$(date +"%D/%M")
+datetime=$(echo "$datetime" | awk -F "/" '{ print $2 "/" $1 "/" $3 }')
 
 gnuplot <<EOF
 set terminal png size 800,600
@@ -7,11 +8,15 @@ set output 'image.png'
 
 set ylabel "Price / USD"
 set timefmt "%H:%M:%S"
+set title "Oil Prices -- Period $datetime" offset 0,0.3
 set xdata time
 set format x "%H:%M"
-plot "data_BRENT.dat" using 1:2 title "Brent Crude" with linespoints linetype 2, \
-     "data_WTI.dat" using 1:2 title "WTI Crude" with linespoints linetype 1, \
-     "data_MURBAN.dat" using 1:2 title "Murban Crude" with linespoints linetype 3
+
+set key outside
+plot "data_BRENT.dat" using 1:2 title "Brent Crude" with linespoints linetype 1, \
+     "data_WTI.dat" using 1:2 title "WTI Crude" with linespoints linetype 2, \
+     "data_MURBAN.dat" using 1:2 title "Murban Crude" with linespoints linetype 3, \
+     "data_NATURAL_GAS.dat" using 1:2 title "Natural Gas" with linespoints linetype 4
 
 EOF
 
@@ -23,32 +28,32 @@ WTI=$(mysql -u "${moiz}" -p"${MYSQLPASS}" "${CW_1314}" <<EOFMYSQL
 EOFMYSQL
 )
 
-WTI=$(echo "$WTI" | grep -v "WTI TimeReading")
+WTI=$(echo "$WTI" | grep -v "WTI	TimeReading")
 echo "$WTI" | grep -v "WTI	TimeReading" | awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "data_WTI.dat"
 
 
 
-WTI=$(mysql -u "${moiz}" -p"${MYSQLPASS}" "${CW_1314}" <<EOFMYSQL
+Brent=$(mysql -u "${moiz}" -p"${MYSQLPASS}" "${CW_1314}" <<EOFMYSQL
               SELECT Brent, TimeReading FROM CW_1314.OILPRICES
               ORDER BY TimeReading DESC
               LIMIT 20;
 EOFMYSQL
 )
 
-WTI=$(echo "$WTI" | grep -v "Brent TimeReading")
-echo "$WTI" | grep -v "Brent	TimeReading" | awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "data_BRENT.dat"
+Brent=$(echo "$WTI" | grep -v "Brent TimeReading")
+echo "$Brent" | grep -v "Brent	TimeReading" | awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "data_BRENT.dat"
 
 
 
-WTI=$(mysql -u "${moiz}" -p"${MYSQLPASS}" "${CW_1314}" <<EOFMYSQL
+Murban=$(mysql -u "${moiz}" -p"${MYSQLPASS}" "${CW_1314}" <<EOFMYSQL
               SELECT Murban, TimeReading FROM CW_1314.OILPRICES
               ORDER BY TimeReading DESC
               LIMIT 20;
 EOFMYSQL
 )
 
-WTI=$(echo "$WTI" | grep -v "Murban TimeReading")
-echo "$WTI" | grep -v "Murban	TimeReading" | awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "data_MURBAN.dat"
+Murban=$(echo "$Murban" | grep -v "Murban TimeReading")
+echo "$Murban" | grep -v "Murban	TimeReading" | awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "data_MURBAN.dat"
 
 
 

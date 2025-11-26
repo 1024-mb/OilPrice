@@ -1,7 +1,5 @@
 #!/bin/bash
 
-MYSQLPASS="344117ABc#"
-
 curl -o "response.html" "https://oilprice.com/"
 
 index=$(cat index.txt | awk '{print $1+0}')
