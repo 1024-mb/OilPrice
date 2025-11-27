@@ -16,10 +16,11 @@ for price in "${prices_str[@]}"; do
 done
 
 
-echo "${prices[@]}"
 datetime=$(date +"%H:%M:%S")
+date=$((date +"%D/%M/%Y") | awk -F "/" '{ print $5 "-" $1 "-" $2 }')
+echo "$date"
 
 mysql -u "${moiz}" -p"${MYSQLPASS}" "${CW_1314}" <<EOFMYSQL
-INSERT INTO CW_1314.OILPRICES(RecordID, TimeReading, WTI, Brent, Murban, Natural_Gas) 
-VALUES ($index, '$datetime', ${prices[0]}, ${prices[1]}, ${prices[2]}, ${prices[3]});
+INSERT INTO CW_1314.OILPRICES(RecordID, WTI, Brent, Murban, TimeReading, DateReading) 
+VALUES ($index, ${prices[0]}, ${prices[1]}, ${prices[2]}, '$datetime', '$date');
 EOFMYSQL
