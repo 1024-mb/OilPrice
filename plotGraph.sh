@@ -101,20 +101,22 @@ echo "s $MURBANHighest l $MURBANLowest o $MURBANLatest f"
 gnuplot <<EOF
 set terminal png size 1000,600
 set output 'image.png'
-set label "TODAY" at graph 1.02,0.64 textcolor rgbcolor "#0c0d0d"
-set label "Murban Latest:   \$${MURBANLatest}" at graph 1.025,0.6 textcolor rgbcolor "#1c1c1c"
-set label "Murban High:     \$${MURBANHighest}" at graph 1.025,0.55 textcolor rgbcolor "#1c1c1c"
-set label "Murban Low:      \$${MURBANLowest}" at graph 1.025,0.5 textcolor rgbcolor "#1c1c1c"
-set label "Brent Latest:      \$${BRENTLatest}" at graph 1.025,0.4 textcolor rgbcolor "#1c1c1c"
-set label "Brent High:        \$${BRENTHighest}" at graph 1.025,0.35 textcolor rgbcolor "#1c1c1c"
-set label "Brent Low:         \$${BRENTLowest}" at graph 1.025,0.30 textcolor rgbcolor "#1c1c1c"
-set label "WTI Latest:        \$${WTILatest}" at graph 1.025,0.2 textcolor rgbcolor "#1c1c1c"
-set label "WTI High:          \$${WTIHighest}" at graph 1.025,0.15 textcolor rgbcolor "#1c1c1c"
-set label "WTI Low:           \$${WTILowest}" at graph 1.025,0.1 textcolor rgbcolor "#1c1c1c"
+set label "TODAY" at graph 1.0225,0.66 textcolor rgbcolor "#0c0d0d" font ",18"
+set label "Murban Latest:   \$${MURBANLatest}" at graph 1.0275,0.6 textcolor rgbcolor "#1c1c1c"
+set label "Murban High:     \$${MURBANHighest}" at graph 1.0275,0.55 textcolor rgbcolor "#1c1c1c"
+set label "Murban Low:      \$${MURBANLowest}" at graph 1.0275,0.5 textcolor rgbcolor "#1c1c1c"
+set label "Brent Latest:      \$${BRENTLatest}" at graph 1.0275,0.4 textcolor rgbcolor "#1c1c1c"
+set label "Brent High:        \$${BRENTHighest}" at graph 1.0275,0.35 textcolor rgbcolor "#1c1c1c"
+set label "Brent Low:         \$${BRENTLowest}" at graph 1.0275,0.30 textcolor rgbcolor "#1c1c1c"
+set label "WTI Latest:        \$${WTILatest}" at graph 1.0275,0.2 textcolor rgbcolor "#1c1c1c"
+set label "WTI High:          \$${WTIHighest}" at graph 1.0275,0.15 textcolor rgbcolor "#1c1c1c"
+set label "WTI Low:           \$${WTILowest}" at graph 1.0275,0.1 textcolor rgbcolor "#1c1c1c"
 
-set ylabel "Price Per Barrel / US$"
+set ylabel "Price Per Barrel / US$" font ",15" offset 1
+set xlabel "Time" font ",15"
+
 set timefmt "%H:%M:%S"
-set title "$datedisplay - Oil Prices" offset 0,0.3 font "28"
+set title "$datedisplay - Oil Prices" offset 10,0.0 font ",20"
 set xdata time
 set format x "%H:%M"
 set grid
