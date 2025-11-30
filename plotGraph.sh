@@ -180,8 +180,7 @@ fi
 WTI=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
               SELECT WTI, TimeReading FROM CW_1314.OILPRICES
               WHERE DateReading = '${date}'
-              ORDER BY TimeReading DESC
-              LIMIT 20;
+              ORDER BY TimeReading DESC;
 EOFMYSQL
 )
 
@@ -193,8 +192,7 @@ WTI=$(/usr/bin/echo "$WTI" | /usr/bin/grep -v "WTI	TimeReading")
 Brent=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
               SELECT Brent, TimeReading FROM CW_1314.OILPRICES
               WHERE DateReading = '${date}'
-              ORDER BY TimeReading DESC
-              LIMIT 20;
+              ORDER BY TimeReading DESC;
 EOFMYSQL
 )
 
@@ -206,8 +204,7 @@ Brent=$(/usr/bin/echo "$Brent" | /usr/bin/grep -v "Brent TimeReading")
 Murban=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
               SELECT Murban, TimeReading FROM CW_1314.OILPRICES
               WHERE DateReading = '${date}'
-              ORDER BY TimeReading DESC
-              LIMIT 20;
+              ORDER BY TimeReading DESC;
 EOFMYSQL
 )
 
