@@ -1,0 +1,5 @@
+CREATE TABLE READING(
+	DatapointID INT PRIMARY KEY AUTO_INCREMENT,
+	TimeReading TIME,
+    MarketDate DATE
+);
