@@ -6,7 +6,6 @@ command -v /usr/bin/grep >&2 && command -v /usr/bin/awk >&2 && command -v /usr/b
 if ! [ -f "/tmp/cron_log.txt" ] || ! [ -f "./response.html" ]; then
 	/usr/bin/echo "" > "/tmp/cron_log.txt"
 	/usr/bin/echo "" > "./response.html"
-
 fi
 
 # uses /usr/bin to ensure that the program does not malfunction in case the commands are not added to the PATH variable
@@ -50,13 +49,17 @@ if [[ $sqlexists != 0 ]]; then
 sudo /usr/bin/echo "ERROR: MySQL is Not Functioning Correctly" >> /tmp/cron_log.txt
 
 else
-
 # inserts the data for the fuel prices, as well as the timestamp into the OILPRICES table
 /usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
-INSERT INTO CW_1314.OILPRICES(TimeReading, DateReading, OilPrice, OilType) 
-VALUES ('$datetime', '$date', ${prices[0]}, 'WTI'),
-	   ('$datetime', '$date', ${prices[1]}, 'BRENT'),
-	   ('$datetime', '$date',  ${prices[2]}, 'MURBAN');
+INSERT INTO CW_1314.READING(TimeReading, MarketDate) 
+VALUES ('$datetime', '$date');
+
+SET @DatapointID = LAST_INSERT_ID();
+
+INSERT INTO CW_1314.OILPRICES(DatapointID, OilID, Price) 
+VALUES (@DatapointID, 1, ROUND(${prices[0]}, 2)),
+	   (@DatapointID, 2, ROUND(${prices[1]}, 2)),
+	   (@DatapointID, 3, ROUND(${prices[2]}, 2));
 EOFMYSQL
 
 fi
