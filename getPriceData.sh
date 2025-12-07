@@ -1,10 +1,10 @@
 #!/bin/bash
 
-if command -v /usr/bin/echo >&2 && command -v /usr/bin/curl >&2 && command -v /usr/bin/cat >&2 && 
-command -v /usr/bin/grep >&2 && command -v /usr/bin/awk >&2 && command -v /usr/bin/mysql >&2 && ! [ -z "${MYSQLPASS}" ]; then
+if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/null >&2 && command -v /usr/bin/cat >/dev/null >&2 && 
+command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && ! [ -z "${MYSQLPASS}" ]; then
 
-if ! [ -f "/tmp/cron_log.txt" ] || ! [ -f "./response.html" ]; then
-	/usr/bin/echo "" > "/tmp/cron_log.txt"
+if ! [ -f "./cron_log.log" ] || ! [ -f "./response.html" ]; then
+	/usr/bin/echo "" > "./cron_log.log"
 	/usr/bin/echo "" > "./response.html"
 fi
 
@@ -24,8 +24,9 @@ prices_str=($(/usr/bin/grep -m 5 'class="value"' 'response.html' | /usr/bin/awk 
 prices=()
 price1=0
 
-# checks if the list is empty - if so, then doesn't plot it
-if [[ "${prices_str[1]}" != "" ]]; then
+# checks if the values are numeric or not - and stores them depending on this check.
+numcheck='^[0-9]+([.][0-9]{2})?$'
+if [[ ${prices_str[0]} =~ $numcheck && ${prices_str[1]}  =~ $numcheck && ${prices_str[2]} =~ $numcheck ]]; then
 # converts the prices from string to integer and adds it to a prices list
 for price in "${prices_str[@]}"; do
 	price1=$(/usr/bin/echo "$price" | /usr/bin/awk '{print $1+0.0}')
@@ -46,7 +47,8 @@ EOF
 sqlexists=$?
 
 if [[ $sqlexists != 0 ]]; then
-sudo /usr/bin/echo "ERROR: MySQL is Not Functioning Correctly" >> /tmp/cron_log.txt
+curr_time=$(/usr/bin/date)
+/usr/bin/echo "<ERROR: MySQL is Not Functioning Correctly> <getPriceData> <${curr_time}> <49>" >> ./cron_log.log
 
 else
 # inserts the data for the fuel prices, as well as the timestamp into the OILPRICES table
@@ -68,15 +70,18 @@ fi
 
 # condition if 
 else
-sudo /usr/bin/echo "ERROR: Scraper Blocked / Website Down" >> /tmp/cron_log.txt
+/usr/bin/echo "<ERROR: Scraper Blocked / Website Down> <getPriceData> <71>" >> ./cron_log.log
 
 fi
 
 # condition if the mysql password is not correctly configured
 elif [ -z "${MYSQLPASS}" ]; then
-sudo /usr/bin/echo "Environment Variable for MYSQLPASS Does Not Exist" >>  /tmp/cron_log.txt
+curr_time=$(/usr/bin/date)
+/usr/bin/echo "<ERROR: Environment Variable for MYSQLPASS Does Not Exist> <getPriceData> <${curr_time}> <77>" >>  ./cron_log.log
 
 # condition if the bash commands do not exist
 else
-sudo /usr/bin/echo "Necessary Commands for getPriceData.sh Do Not Exist" >>  /tmp/cron_log.txt
+curr_time=$(/usr/bin/date)
+
+/usr/bin/echo "<ERROR: Necessary Commands for getPriceData.sh Do Not Exist> <getPriceData> <${curr_time}> <81>" >>  ./cron_log.log
 fi

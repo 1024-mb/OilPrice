@@ -1,26 +1,30 @@
 #!/bin/bash
 
-if command -v /usr/bin/echo >&2 && command -v /usr/bin/curl >&2 && command -v /usr/bin/cat >&2 && 
-command -v /usr/bin/grep >&2 && command -v /usr/bin/awk >&2 && command -v /usr/bin/mysql >&2 && 
-command -v /usr/bin/date && command -v /usr/bin/gnuplot >&2; then
+if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/null >&2 && command -v /usr/bin/cat >/dev/null >&2 && 
+command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && 
+command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/null >&2; then
 
-if ! [ -f "/tmp/cron_log.txt" ]; then
-	/usr/bin/echo "" > "/tmp/cron_log.txt"
+if ! [ -f "./cron_log.log" ]; then
+	/usr/bin/echo "" > "./cron_log.log"
 
-elif ! [ -f "./data_BRENT.dat" ]; then
+fi
+if ! [ -f "./data_BRENT.dat" ]; then
 	/usr/bin/echo "" > "./data_BRENT.dat"
 
-elif ! [ -f "./data_MURBAN.dat" ]; then
+fi
+if ! [ -f "./data_MURBAN.dat" ]; then
 	/usr/bin/echo "" > "./data_MURBAN.dat"
 
-elif ! [ -f "./data_WTI.dat" ]; then
+fi
+if ! [ -f "./data_WTI.dat" ]; then
 	/usr/bin/echo "" > "./data_WTI.dat"
 
-elif ! [ -f "./database/day" ]; then
+fi
+if ! [ -f "./database/day" ]; then
 	/usr/bin/mkdir "./database/day"
-
-elif ! [ -f "./database/week" ]; then
-	/usr/bin/mkdir ""
+fi
+if ! [ -f "./database/week" ]; then
+	/usr/bin/mkdir "./database/week"
 fi
 
 #test to check if user's mysql is working correctly
@@ -41,7 +45,7 @@ date=$(/usr/bin/date +"%Y-%m-%d")
 data=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
 SELECT OilID, MAX(Price), MIN(Price), MAX(RecordID)
 FROM CW_1314.OILPRICES
-WHERE DatapointID IN (SELECT DatapointID FROM READING WHERE MarketDate='${date}')
+WHERE DatapointID IN (SELECT READING.DatapointID FROM READING WHERE MarketDate='${date}')
 GROUP BY OilID;
 
 EOFMYSQL
@@ -130,9 +134,13 @@ BRENTAvg=$(/usr/bin/echo "$BRENTAvg" | /usr/bin/grep -v "MarketDate")
 # formats datetime for comparison
 datetime=$(/usr/bin/date +"%H:%M:%S")
 
+MURBANCat=$(cat "data_MURBAN.dat")
+WTICat=$(cat "data_WTI.dat")
+BRENTCat=$(cat "data_BRENT.dat")
+
 #if the day is almost over, will add the labels for the times when the stock market closed for
 # Murban and WTI
-if [[ "$datetime" < "23:00:00" && $MURBANdata != "" && $WTIdata != "" && $BRENTdata != "" ]]; then
+if [[ "$datetime" < "23:00:00" && MURBANCat != "" && WTICat != "" && BRENTCat != "" ]]; then
 
 /usr/bin/gnuplot<< EOF
 set terminal png size 1000,600
@@ -168,7 +176,7 @@ plot "data_BRENT.dat" using 1:2 title "Brent Crude" with linespoints linetype 4 
 EOF
 
 
-elif [[ $MURBANdata != "" || $WTIdata != "" || $BRENTdata != "" ]]; then
+elif [[ MURBANCat != "" && WTICat != "" && BRENTCat != "" ]]; then
 /usr/bin/gnuplot <<EOF
 set terminal png size 1000,600
 set output './database/day/image_${date}.png'
@@ -218,7 +226,7 @@ EOF
 
 fi
 # plots the weekly graph of average prices (past 7 days for each of Brent, Murban and WTI )
-if [[ "$datetime" < "23:00:00" && $BRENTAvg != "" && $WTIAvg != "" && $MURBANAvg != "" ]]; then
+if [[ "${BRENTAvg[0]}" != "" && "${WTIAvg[0]}" != "" && "${MURBANAvg[0]}" != "" ]]; then
 date_min=$(date -d "${date} - 7 days" +"%Y-%m-%d")
 /usr/bin/gnuplot <<EOF
 set terminal png size 1000,600
@@ -248,22 +256,11 @@ set terminal pngcairo enhanced
 set terminal png size 1000,600
 set output './database/week/image_week_${date}.png'
 
-set label "Sorry - No Data For ${date}" at graph 0.4,0.5 textcolor rgbcolor "#0c0d0d" font ",18"
+set label "Sorry - No Data For 7 Days From ${date}" at graph 0.4,0.5 textcolor rgbcolor "#0c0d0d" font ",18"
 plot 1 linecolor "black", 1.005 linecolor "black"
 EOF
 
 fi
-
-BRENTHighest="${BRENTdata[0]}"
-BRENTLowest="${BRENTdata[1]}"
-BRENTLatest=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
-SELECT Price
-FROM CW_1314.OILPRICES
-WHERE DatapointID = (SELECT DatapointID FROM READING WHERE MarketDate='${date}' ORDER BY TimeReading DESC LIMIT 1)
-AND OilID=2;
-EOFMYSQL
-)
-BRENTLatest=$(/usr/bin/echo "${BRENTLatest}" | /usr/bin/grep -v "Price")
 
 
 # extracts and puts the next set of price and time values into the .dat file for future reading
@@ -309,7 +306,7 @@ Murban=$(/usr/bin/echo "$Murban" | /usr/bin/grep -v "Price")
 
 fi
 else
-sudo /usr/bin/echo "Neccessary commands for plotGraph (echo, curl,cat, grep, awk) do not exist on your system" >> /tmp/cron_log.txt
+curr_time=$(/usr/bin/date)
+sudo /usr/bin/echo "<Necessary commands for plotGraph do not exist> <plotGraph> <$curr_time> <310>" >> ./cron_log.log
 fi
 
-#SELECT DATE_SUB("2017-06-15", INTERVAL -2 MONTH);
