@@ -50,32 +50,33 @@ GROUP BY OilID;
 
 EOFMYSQL
 )
-
-data=$(echo "$data" | grep -v "OilType")
-BRENTdata=($(/usr/bin/echo "$data" | /usr/bin/awk 'NR==2 {print $2}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==2 {print $3}'))
-WTIdata=($(/usr/bin/echo "$data" | /usr/bin/awk 'NR==3 {print $2}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==3 {print $3}'))
-MURBANdata=($(/usr/bin/echo "$data" | /usr/bin/awk 'NR==4 {print $2}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==4 {print $3}'))
+WTIdata=($(/usr/bin/echo "$data" | /usr/bin/awk 'NR==2 {print $2}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==2 {print $3}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==2 {print $4}'))
+BRENTdata=($(/usr/bin/echo "$data" | /usr/bin/awk 'NR==3 {print $2}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==3 {print $3}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==3 {print $4}'))
+MURBANdata=($(/usr/bin/echo "$data" | /usr/bin/awk 'NR==4 {print $2}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==4 {print $3}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==4 {print $4}'))
 
 # parses the data for Brent
 BRENTHighest="${BRENTdata[0]}"
 BRENTLowest="${BRENTdata[1]}"
+BRENTLatestID=$(echo "${BRENTdata[2]}" | awk '{ print $1+0 }')
 BRENTLatest=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
 SELECT Price
 FROM CW_1314.OILPRICES
-WHERE DatapointID = (SELECT DatapointID FROM READING WHERE MarketDate='${date}' ORDER BY READING.TimeReading DESC LIMIT 1)
-AND OilID=2
+WHERE RecordID = ${BRENTLatestID}
+AND OilID=2;
 EOFMYSQL
 )
+
 BRENTLatest=$(/usr/bin/echo "${BRENTLatest}" | /usr/bin/grep -v "Price")
 
 # extracts the latest data for WTI from OILPRICES
 WTIHighest="${WTIdata[0]}"
 WTILowest="${WTIdata[1]}"
+WTILatestID=$(echo "${WTIdata[2]}" | awk '{ print $1+0 }')
 WTILatest=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
 SELECT Price
 FROM CW_1314.OILPRICES
-WHERE DatapointID = (SELECT DatapointID FROM READING WHERE MarketDate='${date}' ORDER BY READING.TimeReading DESC LIMIT 1)
-AND OilID=1
+WHERE RecordID = ${WTILatestID}
+AND OilID=1;
 EOFMYSQL
 )
 WTILatest=$(/usr/bin/echo "${WTILatest}" | /usr/bin/grep -v "Price")
@@ -84,10 +85,11 @@ WTILatest=$(/usr/bin/echo "${WTILatest}" | /usr/bin/grep -v "Price")
 #gets the data for Murban from OILPRICES
 MURBANHighest=${MURBANdata[0]}
 MURBANLowest=${MURBANdata[1]}
+MURBANLatestID=$(echo "${MURBANdata[2]}" | awk '{ print $1+0 }')
 MURBANLatest=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
 SELECT Price
 FROM CW_1314.OILPRICES
-WHERE DatapointID = (SELECT DatapointID FROM READING WHERE MarketDate='${date}' ORDER BY READING.TimeReading DESC LIMIT 1)
+WHERE RecordID = ${MURBANLatestID}
 AND OilID=3;
 
 EOFMYSQL
@@ -134,9 +136,6 @@ BRENTAvg=$(/usr/bin/echo "$BRENTAvg" | /usr/bin/grep -v "MarketDate")
 # formats datetime for comparison
 datetime=$(/usr/bin/date +"%H:%M:%S")
 
-MURBANCat=$(cat "data_MURBAN.dat")
-WTICat=$(cat "data_WTI.dat")
-BRENTCat=$(cat "data_BRENT.dat")
 
 #if the day is almost over, will add the labels for the times when the stock market closed for
 # Murban and WTI
@@ -151,7 +150,7 @@ set label "Murban Latest:   \$${MURBANLatest}" at graph 1.0275,0.6 textcolor rgb
 set label "Murban High:     \$${MURBANHighest}" at graph 1.0275,0.55 textcolor rgbcolor "#1c1c1c" font ",11"
 set label "Murban Low:      \$${MURBANLowest}" at graph 1.0275,0.5 textcolor rgbcolor "#1c1c1c" font ",11"
 
-set label "Brent Latest:     \$${BRENTLatest}" at graph 1.0275,0.4 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "Brent Latest:      \$${BRENTLatest}" at graph 1.0275,0.4 textcolor rgbcolor "#1c1c1c" font ",11"
 set label "Brent High:        \$${BRENTHighest}" at graph 1.0275,0.35 textcolor rgbcolor "#1c1c1c" font ",11"
 set label "Brent Low:         \$${BRENTLowest}" at graph 1.0275,0.30 textcolor rgbcolor "#1c1c1c" font ",11"
 
