@@ -307,6 +307,6 @@ Murban=$(/usr/bin/echo "$Murban" | /usr/bin/grep -v "Price")
 fi
 else
 curr_time=$(/usr/bin/date)
-/usr/bin/echo "<Necessary commands for plotGraph do not exist> <plotGraph> <$curr_time> <310>" >> ./cron_log.log
+/usr/bin/echo "ERROR	Necessary commands for plotGraph do not exist	plotGraph		$curr_time	310" >> ./cron_log.log
 fi
 

@@ -48,7 +48,7 @@ sqlexists=$?
 
 if [[ $sqlexists != 0 ]]; then
 curr_time=$(/usr/bin/date)
-/usr/bin/echo "<ERROR: MySQL is Not Functioning Correctly> <getPriceData> <${curr_time}> <49>" >> ./cron_log.log
+/usr/bin/echo "ERROR	MySQL is Not Functioning Correctly	getPriceData	${curr_time}	49" >> ./cron_log.log
 
 else
 # inserts the data for the fuel prices, as well as the timestamp into the OILPRICES table
@@ -70,18 +70,18 @@ fi
 
 # condition if 
 else
-/usr/bin/echo "<ERROR: Scraper Blocked / Website Down> <getPriceData> <71>" >> ./cron_log.log
+/usr/bin/echo "ERROR	Scraper Blocked/Website Down	getPriceData	${curr_time}	71" >> ./cron_log.log
 
 fi
 
 # condition if the mysql password is not correctly configured
 elif [ -z "${MYSQLPASS}" ]; then
 curr_time=$(/usr/bin/date)
-/usr/bin/echo "<ERROR: Environment Variable for MYSQLPASS Does Not Exist> <getPriceData> <${curr_time}> <77>" >>  ./cron_log.log
+/usr/bin/echo "ERROR	Environment Variable for MYSQLPASS Does Not Exist	 getPriceData 	${curr_time}	77" >>  ./cron_log.log
 
 # condition if the bash commands do not exist
 else
 curr_time=$(/usr/bin/date)
 
-/usr/bin/echo "<ERROR: Necessary Commands for getPriceData.sh Do Not Exist> <getPriceData> <${curr_time}> <81>" >>  ./cron_log.log
+/usr/bin/echo "ERROR	Necessary Commands for getPriceData.sh Do Not Exist		getPriceData	${curr_time}	81" >>  ./cron_log.log
 fi
