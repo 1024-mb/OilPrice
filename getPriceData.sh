@@ -35,8 +35,8 @@ done
 
 
 # gets current date and time in the required format, to be used to filter records in the database
-datetime=$(date +"%H:%M:%S")
-date=$(date +"%Y-%m-%d")
+datetime=$(/usr/bin/date +"%H:%M:%S")
+date=$(/usr/bin/date +"%Y-%m-%d")
 
 
 # inserts the data for the fuel prices, as well as the timestamp into the OILPRICES table

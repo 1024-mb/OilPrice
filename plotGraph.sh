@@ -6,19 +6,15 @@ command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/nul
 
 if ! [ -f "./cron_log.log" ]; then
 	/usr/bin/echo "" > "./cron_log.log"
-
 fi
 if ! [ -f "./data_BRENT.dat" ]; then
 	/usr/bin/echo "" > "./data_BRENT.dat"
-
 fi
 if ! [ -f "./data_MURBAN.dat" ]; then
 	/usr/bin/echo "" > "./data_MURBAN.dat"
-
 fi
 if ! [ -f "./data_WTI.dat" ]; then
 	/usr/bin/echo "" > "./data_WTI.dat"
-
 fi
 if ! [ -f "./database/day" ]; then
 	/usr/bin/mkdir "./database/day"
@@ -55,9 +51,10 @@ BRENTdata=($(/usr/bin/echo "$data" | /usr/bin/awk 'NR==3 {print $2}') $(/usr/bin
 MURBANdata=($(/usr/bin/echo "$data" | /usr/bin/awk 'NR==4 {print $2}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==4 {print $3}') $(/usr/bin/echo "$data" | /usr/bin/awk 'NR==4 {print $4}'))
 
 # parses the data for Brent
+# need to get the highest data for each fuel type indiviually, in case data was not recorded when scraping occured.
 BRENTHighest="${BRENTdata[0]}"
 BRENTLowest="${BRENTdata[1]}"
-BRENTLatestID=$(echo "${BRENTdata[2]}" | awk '{ print $1+0 }')
+BRENTLatestID=$(/usr/bin/echo "${BRENTdata[2]}" | /usr/bin/awk '{ print $1+0 }')
 BRENTLatest=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
 SELECT Price
 FROM CW_1314.OILPRICES
@@ -71,7 +68,7 @@ BRENTLatest=$(/usr/bin/echo "${BRENTLatest}" | /usr/bin/grep -v "Price")
 # extracts the latest data for WTI from OILPRICES
 WTIHighest="${WTIdata[0]}"
 WTILowest="${WTIdata[1]}"
-WTILatestID=$(echo "${WTIdata[2]}" | awk '{ print $1+0 }')
+WTILatestID=$(/usr/bin/echo "${WTIdata[2]}" | /usr/bin/awk '{ print $1+0 }')
 WTILatest=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
 SELECT Price
 FROM CW_1314.OILPRICES
@@ -146,17 +143,17 @@ set terminal png size 1000,600
 set output './database/day/image_${date}.png'
 set label "TODAY        \$USD" at graph 1.0225,0.66 textcolor rgbcolor "#0c0d0d" font ",15"
 
-set label "Murban Latest:   \$${MURBANLatest}" at graph 1.0275,0.6 textcolor rgbcolor "#1c1c1c" font ",11"
-set label "Murban High:     \$${MURBANHighest}" at graph 1.0275,0.55 textcolor rgbcolor "#1c1c1c" font ",11"
-set label "Murban Low:      \$${MURBANLowest}" at graph 1.0275,0.5 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "Murban Latest:    \$${MURBANLatest}" at graph 1.0275,0.6 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "Murban High:      \$${MURBANHighest}" at graph 1.0275,0.55 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "Murban Low:       \$${MURBANLowest}" at graph 1.0275,0.5 textcolor rgbcolor "#1c1c1c" font ",11"
 
-set label "Brent Latest:      \$${BRENTLatest}" at graph 1.0275,0.4 textcolor rgbcolor "#1c1c1c" font ",11"
-set label "Brent High:        \$${BRENTHighest}" at graph 1.0275,0.35 textcolor rgbcolor "#1c1c1c" font ",11"
-set label "Brent Low:         \$${BRENTLowest}" at graph 1.0275,0.30 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "Brent Latest:        \$${BRENTLatest}" at graph 1.0275,0.4 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "Brent High:          \$${BRENTHighest}" at graph 1.0275,0.35 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "Brent Low:           \$${BRENTLowest}" at graph 1.0275,0.30 textcolor rgbcolor "#1c1c1c" font ",11"
 
-set label "WTI Latest:        \$${WTILatest}" at graph 1.0275,0.20 textcolor rgbcolor "#1c1c1c" font ",11"
-set label "WTI High:          \$${WTIHighest}" at graph 1.0275,0.15 textcolor rgbcolor "#1c1c1c" font ",11"
-set label "WTI Low:           \$${WTILowest}" at graph 1.0275,0.1 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "WTI Latest:          \$${WTILatest}" at graph 1.0275,0.20 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "WTI High:            \$${WTIHighest}" at graph 1.0275,0.15 textcolor rgbcolor "#1c1c1c" font ",11"
+set label "WTI Low:             \$${WTILowest}" at graph 1.0275,0.1 textcolor rgbcolor "#1c1c1c" font ",11"
 
 set ylabel "Price Per Barrel / US$" font ",15" offset 1
 set xlabel "Time" font ",15"
@@ -213,6 +210,7 @@ EOF
 
 else
 
+
 /usr/bin/gnuplot <<EOF
 set encoding utf8
 set terminal pngcairo enhanced
@@ -226,7 +224,10 @@ EOF
 fi
 # plots the weekly graph of average prices (past 7 days for each of Brent, Murban and WTI )
 if [[ "${BRENTAvg[0]}" != "" && "${WTIAvg[0]}" != "" && "${MURBANAvg[0]}" != "" ]]; then
+date_curr_display=$(/usr/bin/date +"%b %d")
 date_min=$(date -d "${date} - 7 days" +"%Y-%m-%d")
+date_min_display=$(date -d "${date} - 7 days" +"%b %d")
+
 /usr/bin/gnuplot <<EOF
 set terminal png size 1000,600
 set output './database/week/image_week_${date}.png'
@@ -235,7 +236,7 @@ set ylabel "Price Per Barrel / US$" font ",15" offset 1
 set xlabel "Date" font ",15"
 
 set timefmt "%Y-%m-%d"
-set title "Weekly Oil Prices" offset 7,-0.7 font ",20"
+set title "Oil Prices:  ${date_min_display} → ${date_curr_display} " offset 7,-0.7 font ",20"
 set xdata time
 set format x "%Y-%m-%d"
 set grid
@@ -306,6 +307,6 @@ Murban=$(/usr/bin/echo "$Murban" | /usr/bin/grep -v "Price")
 fi
 else
 curr_time=$(/usr/bin/date)
-sudo /usr/bin/echo "<Necessary commands for plotGraph do not exist> <plotGraph> <$curr_time> <310>" >> ./cron_log.log
+/usr/bin/echo "<Necessary commands for plotGraph do not exist> <plotGraph> <$curr_time> <310>" >> ./cron_log.log
 fi
 
