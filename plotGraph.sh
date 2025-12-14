@@ -4,17 +4,17 @@ if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/nul
 command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && 
 command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/null >&2; then
 
-if ! [ -f "./cron_log.log" ]; then
+if ! [ -f "./data/cron_log.log" ]; then
 	/usr/bin/echo "" > "./cron_log.log"
 fi
-if ! [ -f "./data_BRENT.dat" ]; then
-	/usr/bin/echo "" > "./data_BRENT.dat"
+if ! [ -f "./data/data_BRENT.dat" ]; then
+	/usr/bin/echo "" > "./data/data_BRENT.dat"
 fi
-if ! [ -f "./data_MURBAN.dat" ]; then
-	/usr/bin/echo "" > "./data_MURBAN.dat"
+if ! [ -f "./data/data_MURBAN.dat" ]; then
+	/usr/bin/echo "" > "./data/data_MURBAN.dat"
 fi
-if ! [ -f "./data_WTI.dat" ]; then
-	/usr/bin/echo "" > "./data_WTI.dat"
+if ! [ -f "./data/data_WTI.dat" ]; then
+	/usr/bin/echo "" > "./data/data_WTI.dat"
 fi
 if ! [ -f "./database/day" ]; then
 	/usr/bin/mkdir "./database/day"
@@ -103,7 +103,7 @@ GROUP BY READING.MarketDate;
 EOFMYSQL
 )
 MURBANAvg=$(/usr/bin/echo "$MURBANAvg" | /usr/bin/grep -v "MarketDate")
-/usr/bin/echo "$MURBANAvg" | /usr/bin/awk '{ printf "%s %s\n", $1, $2 }' > "data_MURBAN_weekly.dat"
+/usr/bin/echo "$MURBANAvg" | /usr/bin/awk '{ printf "%s %s\n", $1, $2 }' > "./data/data_MURBAN_weekly.dat"
 
 
 WTIAvg=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
@@ -115,7 +115,7 @@ GROUP BY READING.MarketDate;
 EOFMYSQL
 )
 WTIAvg=$(/usr/bin/echo "$WTIAvg" | /usr/bin/grep -v "MarketDate")
-/usr/bin/echo "$WTIAvg" | /usr/bin/awk '{ printf "%s %s\n", $1, $2 }' > "data_WTI_weekly.dat"
+/usr/bin/echo "$WTIAvg" | /usr/bin/awk '{ printf "%s %s\n", $1, $2 }' > "./data/data_WTI_weekly.dat"
 
 
 BRENTAvg=$(/usr/bin/mysql -u "moiz" -p"${MYSQLPASS}" "CW_1314" <<EOFMYSQL
@@ -127,7 +127,7 @@ GROUP BY READING.MarketDate;
 EOFMYSQL
 )
 BRENTAvg=$(/usr/bin/echo "$BRENTAvg" | /usr/bin/grep -v "MarketDate")
-/usr/bin/echo "$BRENTAvg" | /usr/bin/awk '{ printf "%s %s\n", $1, $2 }' > "data_BRENT_weekly.dat"
+/usr/bin/echo "$BRENTAvg" | /usr/bin/awk '{ printf "%s %s\n", $1, $2 }' > "./data/data_BRENT_weekly.dat"
 
 
 # formats datetime for comparison
@@ -165,9 +165,9 @@ set format x "%H:%M"
 set grid
 
 set key outside
-plot "data_BRENT.dat" using 1:2 title "Brent Crude" with linespoints linetype 4 linewidth 1.5 pointsize 0.9, \
-     "data_WTI.dat" using 1:2 title "WTI Crude" with linespoints linetype 7 linewidth 1.5 pointsize 0.9, \
-     "data_MURBAN.dat" using 1:2 title "Murban Crude" with linespoints linetype 5 linewidth 1.5 pointsize 0.9
+plot "./data/data_BRENT.dat" using 1:2 title "Brent Crude" with linespoints linetype 4 linewidth 1.5 pointsize 0.9, \
+     "./data/data_WTI.dat" using 1:2 title "WTI Crude" with linespoints linetype 7 linewidth 1.5 pointsize 0.9, \
+     "./data/data_MURBAN.dat" using 1:2 title "Murban Crude" with linespoints linetype 5 linewidth 1.5 pointsize 0.9
 
 EOF
 
@@ -203,9 +203,9 @@ set format x "%H:%M"
 set grid
 
 set key outside
-plot "data_BRENT.dat" using 1:2 title "Brent Crude" with linespoints linetype 4 linewidth 1.5 pointsize 0.9, \
-     "data_WTI.dat" using 1:2 title "WTI Crude" with linespoints linetype 7 linewidth 1.5 pointsize 0.9, \
-     "data_MURBAN.dat" using 1:2 title "Murban Crude" with linespoints linetype 5 linewidth 1.5 pointsize 0.9
+plot "./data/data_BRENT.dat" using 1:2 title "Brent Crude" with linespoints linetype 4 linewidth 1.5 pointsize 0.9, \
+     "./data/data_WTI.dat" using 1:2 title "WTI Crude" with linespoints linetype 7 linewidth 1.5 pointsize 0.9, \
+     "./data/data_MURBAN.dat" using 1:2 title "Murban Crude" with linespoints linetype 5 linewidth 1.5 pointsize 0.9
 EOF
 
 else
@@ -243,9 +243,9 @@ set grid
 set xrange ['${date_min}':'${date}']
 
 set key outside
-plot "data_BRENT_weekly.dat" using 1:2 title "Brent Crude" with linespoints linetype 4 linewidth 1.5 pointsize 0.9, \
-     "data_WTI_weekly.dat" using 1:2 title "WTI Crude" with linespoints linetype 7 linewidth 1.5 pointsize 0.9, \
-     "data_MURBAN_weekly.dat" using 1:2 title "Murban Crude" with linespoints linetype 5 linewidth 1.5 pointsize 0.9
+plot "./data/data_BRENT_weekly.dat" using 1:2 title "Brent Crude" with linespoints linetype 4 linewidth 1.5 pointsize 0.9, \
+     "./data/data_WTI_weekly.dat" using 1:2 title "WTI Crude" with linespoints linetype 7 linewidth 1.5 pointsize 0.9, \
+     "./data/data_MURBAN_weekly.dat" using 1:2 title "Murban Crude" with linespoints linetype 5 linewidth 1.5 pointsize 0.9
 EOF
 
 
@@ -274,7 +274,7 @@ EOFMYSQL
 )
 
 WTI=$(/usr/bin/echo "$WTI" | /usr/bin/grep -v "Price")
-/usr/bin/echo "$WTI" | /usr/bin/awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "data_WTI.dat"
+/usr/bin/echo "$WTI" | /usr/bin/awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "./data/data_WTI.dat"
 
 
 # extracts and puts the next set of price and time values into the .dat file for future reading
@@ -288,7 +288,7 @@ EOFMYSQL
 )
 
 Brent=$(/usr/bin/echo "$Brent" | /usr/bin/grep -v "Price")
-/usr/bin/echo "$Brent" | /usr/bin/awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "data_BRENT.dat"
+/usr/bin/echo "$Brent" | /usr/bin/awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "./data/data_BRENT.dat"
 
 
 # extracts and puts the next set of price and time values into the .dat file for future reading
@@ -302,7 +302,7 @@ EOFMYSQL
 )
 
 Murban=$(/usr/bin/echo "$Murban" | /usr/bin/grep -v "Price")
-/usr/bin/echo "$Murban" | /usr/bin/awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "data_MURBAN.dat"
+/usr/bin/echo "$Murban" | /usr/bin/awk '{ printf "%s%s %s\n", $2, $3, $1 }' > "./data/data_MURBAN.dat"
 
 fi
 else
