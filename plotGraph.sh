@@ -2,7 +2,7 @@
 
 if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/null >&2 && command -v /usr/bin/cat >/dev/null >&2 && 
 command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && 
-command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/null >&2 && -z "${MYSQLPASS}"; then
+command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/null >&2 && [ -n "${MYSQLPASS:-}" ]; then
 
 if ! [ -f "./cron_log.log" ]; then
 	/usr/bin/echo "" > "./cron_log.log"

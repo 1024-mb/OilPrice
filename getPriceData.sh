@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/null >&2 && command -v /usr/bin/cat >/dev/null >&2 && 
-command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && -z "${MYSQLPASS}"; then
+command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && [ -n "${MYSQLPASS:-}" ]; then
 
 # gets the date for later use
 curr_time=$(/usr/bin/date)
@@ -18,8 +18,8 @@ fi
 result=$?
 response=$(/usr/bin/cat "response.html")
 
-if ! [[ "$result" -ne 0 ]] || echo "$response" | grep -qF "Sorry - the page you tried to reach is no longer here." || \
-echo "$response" | grep -qF "Error" || echo "$response" | grep -qF "404"; then
+if ! ( [[ "$result" -eq 0 ]] || echo "$response" | grep -qF "Sorry - the page you tried to reach is no longer here." || \
+echo "$response" | grep -qF "Error" || echo "$response" | grep -qF "404"); then
 # gets four prices corresponding to WTI, Brent and Murban at the current time.
 prices_str=($(/usr/bin/grep -m 5 'class="value"' 'response.html' | /usr/bin/awk -F '<[^>]*>' '{print $2}'))
 prices=()
