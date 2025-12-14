@@ -2,7 +2,7 @@
 
 if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/null >&2 && command -v /usr/bin/cat >/dev/null >&2 && 
 command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && 
-command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/null >&2; then
+command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/null >&2 && -v MYSQLPASS; then
 
 if ! [ -f "./cron_log.log" ]; then
 	/usr/bin/echo "" > "./cron_log.log"
@@ -52,6 +52,7 @@ MURBANdata=($(/usr/bin/echo "$data" | /usr/bin/awk 'NR==4 {print $2}') $(/usr/bi
 
 # parses the data for Brent
 # need to get the highest data for each fuel type indiviually, in case data was not recorded when scraping occured.
+if ! [ "${#BRENTdata[@]}" -lt 3 ]; then
 BRENTHighest="${BRENTdata[0]}"
 BRENTLowest="${BRENTdata[1]}"
 BRENTLatestID=$(/usr/bin/echo "${BRENTdata[2]}" | /usr/bin/awk '{ print $1+0 }')
@@ -129,6 +130,11 @@ EOFMYSQL
 BRENTAvg=$(/usr/bin/echo "$BRENTAvg" | /usr/bin/grep -v "MarketDate")
 /usr/bin/echo "$BRENTAvg" | /usr/bin/awk '{ printf "%s %s\n", $1, $2 }' > "./data/data_BRENT_weekly.dat"
 
+else
+/usr/bin/echo "ERROR	Necessary commands for plotGraph do not exist	plotGraph		$curr_time	310" >> ./cron_log.log
+exit 1
+
+fi
 
 # formats datetime for comparison
 datetime=$(/usr/bin/date +"%H:%M:%S")
@@ -307,7 +313,7 @@ Murban=$(/usr/bin/echo "$Murban" | /usr/bin/grep -v "Price")
 fi
 else
 curr_time=$(/usr/bin/date)
-/usr/bin/echo "ERROR	Necessary commands for plotGraph do not exist	plotGraph		$curr_time	310" >> ./cron_log.log
+/usr/bin/echo "ERROR	Necessary commands/environment variables for plotGraph do not exist	plotGraph		$curr_time	310" >> ./cron_log.log
 exit 1
 fi
 

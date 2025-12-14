@@ -2,7 +2,7 @@
 
 
 if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/null >&2 && command -v /usr/bin/cat >/dev/null >&2 && 
-command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && ! [ -z "${MYSQLPASS}" ]; then
+command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && -v MYSQLPASS; then
 
 # gets the date for later use
 curr_time=$(/usr/bin/date)
@@ -87,7 +87,7 @@ exit 1
 else
 curr_time=$(/usr/bin/date)
 
-/usr/bin/echo "ERROR	Necessary Commands for getPriceData.sh Do Not Exist		getPriceData	${curr_time}	81" >> ./cron_log.log
+/usr/bin/echo "ERROR	Necessary commands/environment variables for plotGraph do not exist	plotGraph		$curr_time	310" >> ./cron_log.log
 exit 1
 
 fi
