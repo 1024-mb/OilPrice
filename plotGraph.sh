@@ -4,7 +4,7 @@ if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/nul
 command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && 
 command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/null >&2; then
 
-if ! [ -f "./data/cron_log.log" ]; then
+if ! [ -f "./cron_log.log" ]; then
 	/usr/bin/echo "" > "./cron_log.log"
 fi
 if ! [ -f "./data/data_BRENT.dat" ]; then
@@ -16,16 +16,16 @@ fi
 if ! [ -f "./data/data_WTI.dat" ]; then
 	/usr/bin/echo "" > "./data/data_WTI.dat"
 fi
-if ! [ -f "./database/day" ]; then
+if ! [ -d "./database/day" ]; then
 	/usr/bin/mkdir "./database/day"
 fi
-if ! [ -f "./database/week" ]; then
+if ! [ -d "./database/week" ]; then
 	/usr/bin/mkdir "./database/week"
 fi
 
 #test to check if user's mysql is working correctly
 /usr/bin/mysql -u"moiz" -p"${MYSQLPASS}" "CW_1314" <<EOF
-SELECT * FROM CW_1314.OILPRICES;
+SHOW TABLES LIKE 'OILPRICES';
 EOF
 # handles sql errors and logs them
 sqlexists=$?
@@ -136,7 +136,7 @@ datetime=$(/usr/bin/date +"%H:%M:%S")
 
 #if the day is almost over, will add the labels for the times when the stock market closed for
 # Murban and WTI
-if [[ "$datetime" < "23:00:00" && MURBANCat != "" && WTICat != "" && BRENTCat != "" ]]; then
+if [[ "$datetime" < "23:00:00" && "$MURBANCat" != "" && "$WTICat" != "" && "$BRENTCat" != "" ]]; then
 
 /usr/bin/gnuplot<< EOF
 set terminal png size 1000,600
@@ -308,5 +308,6 @@ fi
 else
 curr_time=$(/usr/bin/date)
 /usr/bin/echo "ERROR	Necessary commands for plotGraph do not exist	plotGraph		$curr_time	310" >> ./cron_log.log
+exit 1
 fi
 
