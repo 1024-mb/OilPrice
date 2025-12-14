@@ -1,8 +1,7 @@
 #!/bin/bash
 
-
 if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/null >&2 && command -v /usr/bin/cat >/dev/null >&2 && 
-command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && -v MYSQLPASS; then
+command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && -z "${MYSQLPASS}"; then
 
 # gets the date for later use
 curr_time=$(/usr/bin/date)
@@ -19,7 +18,7 @@ fi
 result=$?
 response=$(/usr/bin/cat "response.html")
 
-if [[ "$result" -ne 0 ]] || echo "$response" | grep -qF "Sorry - the page you tried to reach is no longer here." || \
+if ! [[ "$result" -ne 0 ]] || echo "$response" | grep -qF "Sorry - the page you tried to reach is no longer here." || \
 echo "$response" | grep -qF "Error" || echo "$response" | grep -qF "404"; then
 # gets four prices corresponding to WTI, Brent and Murban at the current time.
 prices_str=($(/usr/bin/grep -m 5 'class="value"' 'response.html' | /usr/bin/awk -F '<[^>]*>' '{print $2}'))
@@ -32,7 +31,7 @@ if [[ ${prices_str[0]} =~ $numcheck && ${prices_str[1]}  =~ $numcheck && ${price
 # converts the prices from string to integer and adds it to a prices list
 for price in "${prices_str[@]}"; do
 	price1=$(/usr/bin/echo "$price" | /usr/bin/awk '{print $1+0.0}')
-	prices+=($price1)
+	prices+=("$price1")
 done
 
 
@@ -50,6 +49,7 @@ sqlexists=$?
 
 if [[ $sqlexists != 0 ]]; then
 
+curr_time=$(/usr/bin/date)
 /usr/bin/echo "ERROR	MySQL is Not Functioning Correctly	getPriceData	${curr_time}	49" >> ./cron_log.log
 
 else
@@ -72,6 +72,7 @@ fi
 
 # condition if 
 else
+curr_time=$(/usr/bin/date)
 /usr/bin/echo "ERROR	Scraper Blocked/Website Down	getPriceData	${curr_time}	71" >> ./cron_log.log
 exit 1
 
@@ -80,14 +81,13 @@ fi
 # condition if the mysql password is not correctly configured
 elif [ -z "${MYSQLPASS}" ]; then
 curr_time=$(/usr/bin/date)
-/usr/bin/echo "ERROR	Environment Variable for MYSQLPASS Does Not Exist	 getPriceData 	${curr_time}	77" >> ./cron_log.log
+/usr/bin/echo "ERROR	Environment Variable for MYSQLPASS Does Not Exist	getPriceData	${curr_time}	77" >> ./cron_log.log
 exit 1
 
 # condition if the bash commands do not exist
 else
 curr_time=$(/usr/bin/date)
-
-/usr/bin/echo "ERROR	Necessary commands/environment variables for plotGraph do not exist	plotGraph		$curr_time	310" >> ./cron_log.log
+/usr/bin/echo "ERROR	Necessary commands/environment variables for plotGraph do not exist	plotGraph	$curr_time	310" >> ./cron_log.log
 exit 1
 
 fi

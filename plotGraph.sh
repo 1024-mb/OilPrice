@@ -2,7 +2,7 @@
 
 if command -v /usr/bin/echo >/dev/null >&2 && command -v /usr/bin/curl >/dev/null >&2 && command -v /usr/bin/cat >/dev/null >&2 && 
 command -v /usr/bin/grep >/dev/null >&2 && command -v /usr/bin/awk >/dev/null >&2 && command -v /usr/bin/mysql >/dev/null >&2 && 
-command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/null >&2 && -v MYSQLPASS; then
+command -v /usr/bin/date >/dev/null >&2 && command -v /usr/bin/gnuplot >/dev/null >&2 && -z "${MYSQLPASS}"; then
 
 if ! [ -f "./cron_log.log" ]; then
 	/usr/bin/echo "" > "./cron_log.log"
@@ -131,7 +131,8 @@ BRENTAvg=$(/usr/bin/echo "$BRENTAvg" | /usr/bin/grep -v "MarketDate")
 /usr/bin/echo "$BRENTAvg" | /usr/bin/awk '{ printf "%s %s\n", $1, $2 }' > "./data/data_BRENT_weekly.dat"
 
 else
-/usr/bin/echo "ERROR	Necessary commands for plotGraph do not exist	plotGraph		$curr_time	310" >> ./cron_log.log
+curr_time=$(/usr/bin/date)
+/usr/bin/echo "ERROR	Necessary commands for plotGraph do not exist	plotGraph		${curr_time}	310" >> ./cron_log.log
 exit 1
 
 fi
@@ -139,6 +140,9 @@ fi
 # formats datetime for comparison
 datetime=$(/usr/bin/date +"%H:%M:%S")
 
+MURBANCat=$(cat "./data/data_MURBAN.dat")
+WTICat=$(cat "./data/data_WTI.dat")
+BRENTCat=$(cat "./data/data_BRENT.dat")
 
 #if the day is almost over, will add the labels for the times when the stock market closed for
 # Murban and WTI
@@ -178,7 +182,7 @@ plot "./data/data_BRENT.dat" using 1:2 title "Brent Crude" with linespoints line
 EOF
 
 
-elif [[ MURBANCat != "" && WTICat != "" && BRENTCat != "" ]]; then
+elif [[ "$MURBANCat" != "" && "$WTICat" != "" && "$BRENTCat" != "" ]]; then
 /usr/bin/gnuplot <<EOF
 set terminal png size 1000,600
 set output './database/day/image_${date}.png'
