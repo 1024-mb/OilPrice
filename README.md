@@ -88,4 +88,4 @@ The system uses four main tables:
 - Graphs include labels for market closure times and daily summaries
 
 ## Author
-Moiz Sajjad – 37448951
+Moiz Sajjad
